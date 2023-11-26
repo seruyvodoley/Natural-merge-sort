@@ -33,11 +33,9 @@ def merge(reverse, key, digit):
     src = "buffer.txt"
     seq1 = open("sequence1.txt", 'r')
     seq2 = open('sequence2.txt', 'r')
-
     dump = open(src, 'a')
-    element1 = (seq1.readline().replace("\n", ''))
-    element2 = (seq2.readline().replace("\n", ''))
-
+    element1 = seq1.readline().replace("\n", '')
+    element2 = seq2.readline().replace("\n", '')
     while True:
         if element1 != '' and element2 != '':
             if digit == 0:
@@ -223,22 +221,24 @@ def sort_row_in_csv(src, output, row):
     with open(tmp_csv, 'r', newline='') as tmp_data:
         reader = csv.DictReader(tmp_data, delimiter=',')
         fieldnames = reader.fieldnames
+        unique_values = list(reader)
     with open(output, 'w', newline='') as csv_output:
         writer = csv.DictWriter(csv_output, delimiter=',', fieldnames=fieldnames)
         writer.writeheader()
         count = count_rows(tmp_csv)
+
         with open('data.txt', 'r') as datafile:
             for i in range(count):
                 element = datafile.readline().replace("\n", '')
                 with open(tmp_csv, 'r', newline='') as tmp_data:
                     reader = csv.DictReader(tmp_data, delimiter=',')
                     for tmp_row in reader:
-                        if tmp_row[row] == element:
+                        if tmp_row[row] == element and tmp_row in unique_values:
+                            unique_values.remove(tmp_row)
                             writer.writerow(tmp_row)
                             break
     if Path(tmp_csv).is_file():
         Path(tmp_csv).unlink()
-
 
 def separate_and_merge(src, reverse, key, digit):
     """
@@ -250,14 +250,13 @@ def separate_and_merge(src, reverse, key, digit):
     :param digit: Тип данных элементов (0 - int, 1 - float, 2 - str).
     """
     datafile = open(src, 'r')
-    open('sequence1.txt', 'w').close()
-    open('sequence2.txt', 'w').close()
     counter = 0
     previous = ""
     seq = list()
     seq.append(open('sequence1.txt', 'a'))
     seq.append(open('sequence2.txt', 'a'))
     flag = 0
+
     while True:
         element = datafile.readline().replace("\n", '')
         if element != '':
@@ -273,10 +272,10 @@ def separate_and_merge(src, reverse, key, digit):
             merge(reverse, key, digit)
             break
         if not reverse and key(previous) > key(element):
-            flag = 1 - flag
+            flag = 1
             counter += 1
         elif reverse and key(previous) < key(element):
-            flag = 1 - flag
+            flag = 1
             counter += 1
         previous = element
         if counter == 2:
@@ -302,7 +301,7 @@ def natural_merge(src, output=None, reverse=False, key=default_key):
     :param reverse: флажок для сортировки по убыванию
     :param key:  ключ сортировки
     """
-    if isinstance(src, list): # для тестов
+    if isinstance(src, list):  # для тестов
         separator = '.'
         src = separator.join(src)
     file_format = src.split('.')[1]
