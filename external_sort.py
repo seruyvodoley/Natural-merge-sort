@@ -1,8 +1,6 @@
 """модуль внешней сортировки есественным слиянием"""
 import argparse
 import csv
-import hashlib
-import json
 import uuid
 from pathlib import Path
 
@@ -102,6 +100,7 @@ def is_digit(src):
             else:
                 break
         return flag
+
 
 def read_csv(src, input_row):
     """
@@ -207,6 +206,7 @@ def count_rows(src):
             count += 1
     return count
 
+
 def add_unique_ids(src, output):
     """
     Добавляет столбец с уникальными идентификаторами к CSV-файлу.
@@ -225,6 +225,7 @@ def add_unique_ids(src, output):
             for row in reader:
                 row['unique_id'] = str(uuid.uuid4())  # Добавляем уникальный идентификатор
                 writer.writerow(row)
+
 
 def sort_row_in_csv(src, output, row):
     """
@@ -247,7 +248,8 @@ def sort_row_in_csv(src, output, row):
 
         with open(output, 'w', newline='') as csv_output:
             # Убираем столбец 'unique_id' из fieldnames перед записью
-            writer = csv.DictWriter(csv_output, delimiter=',', fieldnames=[field for field in fieldnames if field != 'unique_id'])
+            writer = csv.DictWriter(csv_output, delimiter=',', fieldnames=[field for field in fieldnames 
+                                                                           if field != 'unique_id'])
             writer.writeheader()
 
             count = count_rows(tmp_csv)
@@ -255,17 +257,18 @@ def sort_row_in_csv(src, output, row):
             with open('data.txt', 'r') as datafile:
                 for i in range(count):
                     element = datafile.readline().replace("\n", '')
-                    with open(tmp_csv, 'r', newline='') as tmp_data:
-                        reader = csv.DictReader(tmp_data, delimiter=',')
-                        for tmp_row in reader:
-                            if tmp_row[row] == element and tmp_row['unique_id'] not in unique_values:
-                                unique_values.add(tmp_row['unique_id'])
-                                # Убираем столбец 'unique_id' из tmp_row перед записью
-                                tmp_row_without_id = {field: tmp_row[field] for field in tmp_row if field != 'unique_id'}
-                                writer.writerow(tmp_row_without_id)
+                    for tmp_row in reader:
+                        if tmp_row[row] == element and tmp_row['unique_id'] not in unique_values:
+                            unique_values.add(tmp_row['unique_id'])
+                            # Убираем столбец 'unique_id' из tmp_row перед записью
+                            tmp_row_without_id = {field: tmp_row[field] for field in tmp_row 
+                                                  if field != 'unique_id'}
+                            writer.writerow(tmp_row_without_id)
 
-    if Path(tmp_csv).is_file():
-        Path(tmp_csv).unlink()
+        if Path(tmp_csv).is_file():
+            Path(tmp_csv).unlink()
+        
+        
 def separate_and_merge(src, reverse, key, digit):
     """
     разделение и слияние файлов для внешней сортировки
