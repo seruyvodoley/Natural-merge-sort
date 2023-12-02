@@ -227,6 +227,7 @@ def add_unique_ids(src, output):
                 writer.writerow(row)
 
 
+
 def sort_row_in_csv(src, output, row):
     """
     Сортировка по столбцу в CSV.
@@ -248,8 +249,7 @@ def sort_row_in_csv(src, output, row):
 
         with open(output, 'w', newline='') as csv_output:
             # Убираем столбец 'unique_id' из fieldnames перед записью
-            writer = csv.DictWriter(csv_output, delimiter=',', fieldnames=[field for field in fieldnames 
-                                                                           if field != 'unique_id'])
+            writer = csv.DictWriter(csv_output, delimiter=',', fieldnames=[field for field in fieldnames if field != 'unique_id'])
             writer.writeheader()
 
             count = count_rows(tmp_csv)
@@ -257,16 +257,17 @@ def sort_row_in_csv(src, output, row):
             with open('data.txt', 'r') as datafile:
                 for i in range(count):
                     element = datafile.readline().replace("\n", '')
-                    for tmp_row in reader:
-                        if tmp_row[row] == element and tmp_row['unique_id'] not in unique_values:
-                            unique_values.add(tmp_row['unique_id'])
-                            # Убираем столбец 'unique_id' из tmp_row перед записью
-                            tmp_row_without_id = {field: tmp_row[field] for field in tmp_row 
-                                                  if field != 'unique_id'}
-                            writer.writerow(tmp_row_without_id)
+                    with open(tmp_csv, 'r', newline='') as tmp_data:
+                        reader = csv.DictReader(tmp_data, delimiter=',')
+                        for tmp_row in reader:
+                            if tmp_row[row] == element and tmp_row['unique_id'] not in unique_values:
+                                unique_values.add(tmp_row['unique_id'])
+                                # Убираем столбец 'unique_id' из tmp_row перед записью
+                                tmp_row_without_id = {field: tmp_row[field] for field in tmp_row if field != 'unique_id'}
+                                writer.writerow(tmp_row_without_id)
 
-        if Path(tmp_csv).is_file():
-            Path(tmp_csv).unlink()
+    if Path(tmp_csv).is_file():
+        Path(tmp_csv).unlink()
         
         
 def separate_and_merge(src, reverse, key, digit):
